@@ -116,7 +116,7 @@ router.get("/car_id:id", async (req, res) => {
     }
 })
 
-//
+//GET search
 
 //extra GET
 router.get("/fruits_in_price", async (req, res) => {
