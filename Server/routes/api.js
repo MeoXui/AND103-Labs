@@ -223,7 +223,8 @@ router.post('/register', Upload.single('avatar'), async (req, res) => {
             password: data.password,
             email: data.email,
             name: data.name,
-            avatar: data.avatar ? `${req.protocol}://${req.get("host")}/images/${file.filename}` : ''
+            avatar: data.avatar ? `${req.protocol}://${req.get("host")}/images/${file.filename}` : '',
+            available: true,
         })
         const result = await newUser.save()
         if (result) {
@@ -254,14 +255,26 @@ router.post('/register', Upload.single('avatar'), async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
-        const { username, password} = req.body;
-        const query = { $and: [
-            { username: { $regex: `${username}` } },
-            { password: { $regex: `${password}` } }
-        ]}
+        const { username, password } = req.body;
+        const query = {
+            $or: [
+                {
+                    $and: [
+                        { username: { $regex: `${username}` } },
+                        { password: { $regex: `${password}` } }
+                    ]
+                },
+                {
+                    $and: [
+                        { email: { $regex: `${username}` } },
+                        { password: { $regex: `${password}` } }
+                    ]
+                }
+            ]
+        }
         const user = (await Users.find(query))[0]
 
-        if (user) {
+        if (user && user.available) {
             token = JWT.sign({ userId: user._id }, SECRETKEY, { expiresIn: '1h' });
             refreshToken = JWT.sign({ userId: user._id }, SECRETKEY, { expiresIn: '1d' })
             res.json({
