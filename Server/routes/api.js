@@ -31,12 +31,20 @@ router.get("/users", async (req, res) => {
 
 router.get("/distributors", async (req, res) => {
     try {
-        const data = await Distributors.find()
-        res.json({
-            "status": 200,
-            "mess": "Danh sách nhà phân phối",
-            "data": data
-        })
+        const data = await Distributors.find().sort({createdAt: -1})
+        if (data) {
+            res.json({
+                "status": 200,
+                "mess": "Danh sách nhà phân phối",
+                "data": data
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "mess": "Danh sách trống hoặc lấy dữ liệu thất bại",
+                "data": []
+            })
+        }
     } catch (error) {
         console.log(error)
     }
@@ -223,7 +231,8 @@ router.post('/register', Upload.single('avatar'), async (req, res) => {
             password: data.password,
             email: data.email,
             name: data.name,
-            avatar: data.avatar ? `${req.protocol}://${req.get("host")}/images/${file.filename}` : ''
+            avatar: data.avatar ? `${req.protocol}://${req.get("host")}/images/${file.filename}` : '',
+            available: true
         })
         const result = await newUser.save()
         if (result) {
