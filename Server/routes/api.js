@@ -18,12 +18,20 @@ let refreshToken
 //GET
 router.get("/users", async (req, res) => {
     try {
-        const data = await Users.find()
-        res.json({
-            "status": 200,
-            "mess": "Danh sách người dùng",
-            "data": data
-        })
+        const data = await Users.find().sort({ createdAt: -1 })
+        if (data) {
+            res.json({
+                "status": 200,
+                "mess": "Danh sách người dùng",
+                "data": data
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "mess": "Danh sách trống hoặc lấy dữ liệu thất bại",
+                "data": []
+            })
+        }
     } catch (error) {
         console.log(error)
     }
@@ -31,7 +39,7 @@ router.get("/users", async (req, res) => {
 
 router.get("/distributors", async (req, res) => {
     try {
-        const data = await Distributors.find().sort({createdAt: -1})
+        const data = await Distributors.find().sort({ createdAt: -1 })
         if (data) {
             res.json({
                 "status": 200,
@@ -69,12 +77,20 @@ router.get("/fruits", async (req, res) => {
     console.log(payload)
 
     try {
-        const data = await Fruits.find().populate('id_distributor')
-        res.json({
-            "status": 200,
-            "mess": "Danh sách trái cây",
-            "data": data
-        })
+        const data = await Fruits.find().populate('id_distributor').sort({ createdAt: -1 })
+        if (data) {
+            res.json({
+                "status": 200,
+                "mess": "Danh sách trái cây",
+                "data": data
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "mess": "Danh sách trống hoặc lấy dữ liệu thất bại",
+                "data": []
+            })
+        }
     } catch (error) {
         console.log(error)
     }
@@ -99,12 +115,20 @@ router.get("/cars", async (req, res) => {
     console.log(payload)
 
     try {
-        const data = await Cars.find()
-        res.json({
-            "status": 200,
-            "mess": "Danh sách xe ô tô",
-            "data": data
-        })
+        const data = await Cars.find().sort({ createdAt: -1 })
+        if (data) {
+            res.json({
+                "status": 200,
+                "mess": "Danh sách xe ô tô",
+                "data": data
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "mess": "Danh sách trống hoặc lấy dữ liệu thất bại",
+                "data": []
+            })
+        }
     } catch (error) {
         console.log(error)
     }
@@ -168,6 +192,125 @@ router.get("/car_id:id", async (req, res) => {
 })
 
 //GET search
+
+router.get("/search_users", async (req, res) => {
+    // try {
+    //     const data = await Users.find().sort({createdAt: -1})
+    //     if (data) {
+    //         res.json({
+    //             "status": 200,
+    //             "mess": "Danh sách người dùng",
+    //             "data": data
+    //         })
+    //     } else {
+    //         res.json({
+    //             "status": 400,
+    //             "mess": "Danh sách trống hoặc lấy dữ liệu thất bại",
+    //             "data": []
+    //         })
+    //     }
+    // } catch (error) {
+    //     console.log(error)
+    // }
+})
+
+router.get("/search_distributors", async (req, res) => {
+    try {
+        const key = req.query.key
+        const data = await Distributors.find({ name: { $regex: `${key}`, $options: "i" } }).sort({ createdAt: -1 })
+        if (data) {
+            res.json({
+                "status": 200,
+                "mess": "Đã tìm thấy",
+                "data": data
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "mess": "Tìm thất bại",
+                "data": []
+            })
+        }
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+router.get("/search_fruits", async (req, res) => {
+    let payload
+    if (token) {
+        JWT.verify(token, SECRETKEY, (err, _payload) => {
+            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
+            if (err) return res.sendStatus(403)
+            payload = _payload
+        })
+    } else if (refreshToken) {
+        JWT.verify(refreshToken, SECRETKEY, (err, _payload) => {
+            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
+            if (err) return res.sendStatus(403)
+            payload = _payload
+        })
+    }
+    else { return res.sendStatus(401) }
+    console.log(payload)
+
+    // try {
+    //     const data = await Fruits.find().populate('id_distributor').sort({createdAt: -1})
+    //     if (data) {
+    //         res.json({
+    //             "status": 200,
+    //             "mess": "Danh sách trái cây",
+    //             "data": data
+    //         })
+    //     } else {
+    //         res.json({
+    //             "status": 400,
+    //             "mess": "Danh sách trống hoặc lấy dữ liệu thất bại",
+    //             "data": []
+    //         })
+    //     }
+    // } catch (error) {
+    //     console.log(error)
+    // }
+})
+
+router.get("/search_cars", async (req, res) => {
+    let payload
+    if (token) {
+        JWT.verify(token, SECRETKEY, (err, _payload) => {
+            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
+            if (err) return res.sendStatus(403)
+            payload = _payload
+        })
+    } else if (refreshToken) {
+        JWT.verify(refreshToken, SECRETKEY, (err, _payload) => {
+            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
+            if (err) return res.sendStatus(403)
+            payload = _payload
+        })
+    }
+    else { return res.sendStatus(401) }
+    console.log(payload)
+
+    // try {
+    //     const data = await Cars.find().sort({createdAt: -1})
+    //     if (data) {
+    //         res.json({
+    //             "status": 200,
+    //             "mess": "Danh sách xe ô tô",
+    //             "data": data
+    //         })
+    //     } else {
+    //         res.json({
+    //             "status": 400,
+    //             "mess": "Danh sách trống hoặc lấy dữ liệu thất bại",
+    //             "data": []
+    //         })
+    //     }
+    // } catch (error) {
+    //     console.log(error)
+    // }
+})
 
 //extra GET
 router.get("/fruits_in_price", async (req, res) => {
@@ -263,11 +406,13 @@ router.post('/register', Upload.single('avatar'), async (req, res) => {
 
 router.post('/login', async (req, res) => {
     try {
-        const { username, password} = req.body;
-        const query = { $and: [
-            { username: { $regex: `${username}` } },
-            { password: { $regex: `${password}` } }
-        ]}
+        const { username, password } = req.body;
+        const query = {
+            $and: [
+                { username: { $regex: `${username}` } },
+                { password: { $regex: `${password}` } }
+            ]
+        }
         const user = (await Users.find(query))[0]
 
         if (user) {
