@@ -389,13 +389,13 @@ router.post('/register', Upload.single('avatar'), async (req, res) => {
 
             res.json({
                 "status": 200,
-                "mess": "Đã thêm người dùng",
+                "mess": "Đăng ký thành công",
                 "data": result
             })
         } else {
             res.json({
                 "status": 400,
-                "mess": "Thêm thất bại",
+                "mess": "Đăng ký thất bại",
                 "data": []
             })
         }
@@ -430,7 +430,7 @@ router.post('/login', async (req, res) => {
             refreshToken = JWT.sign({ userId: user._id }, SECRETKEY, { expiresIn: '1d' })
             res.json({
                 "status": 200,
-                "mess": "Đăng nhâp thành công",
+                "mess": "Đăng nhập thành công",
                 "data": user,
                 "token": token,
                 "refreshToken": refreshToken
@@ -438,7 +438,7 @@ router.post('/login', async (req, res) => {
         } else {
             res.json({
                 "status": 400,
-                "mess": "Đăng nhâp thất bại",
+                "mess": "Đăng nhập thất bại",
                 "data": []
             })
         }
