@@ -374,7 +374,7 @@ router.post('/register', Upload.single('avatar'), async (req, res) => {
             password: data.password,
             email: data.email,
             name: data.name,
-            avatar: data.avatar ? `${req.protocol}://${req.get("host")}/images/${file.filename}` : '',
+            avatar: `${req.protocol}://${req.get("host")}/images/${file.filename}`,
             available: true,
         })
         const result = await newUser.save()
@@ -430,7 +430,7 @@ router.post('/login', async (req, res) => {
             refreshToken = JWT.sign({ userId: user._id }, SECRETKEY, { expiresIn: '1d' })
             res.json({
                 "status": 200,
-                "messenger": "Đăng nhâp thành công",
+                "mess": "Đăng nhâp thành công",
                 "data": user,
                 "token": token,
                 "refreshToken": refreshToken
@@ -438,7 +438,7 @@ router.post('/login', async (req, res) => {
         } else {
             res.json({
                 "status": 400,
-                "messenger": "Đăng nhâp thất bại",
+                "mess": "Đăng nhâp thất bại",
                 "data": []
             })
         }
