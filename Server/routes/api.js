@@ -59,21 +59,15 @@ router.get("/distributors", async (req, res) => {
 })
 
 router.get("/fruits", async (req, res) => {
+    const auth = req.headers['auth']
+    const token = auth && auth.split('')[1]
+    if (token == null) {return res.sendStatus(401)}
     let payload
-    if (token) {
-        JWT.verify(token, SECRETKEY, (err, _payload) => {
-            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
-            if (err) return res.sendStatus(403)
-            payload = _payload
-        })
-    } else if (refreshToken) {
-        JWT.verify(refreshToken, SECRETKEY, (err, _payload) => {
-            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
-            if (err) return res.sendStatus(403)
-            payload = _payload
-        })
-    }
-    else { return res.sendStatus(401) }
+    JWT.verify(token, SECRETKEY, (err, _payload) => {
+        if (err instanceof JWT.TokenExpiredError) return res.sendStatus(401)
+        // if (err) return res.sendStatus(403)
+        payload = _payload
+    })
     console.log(payload)
 
     try {
@@ -426,8 +420,8 @@ router.post('/login', async (req, res) => {
         const user = (await Users.find(query))[0]
 
         if (user && user.available) {
-            token = JWT.sign({ userId: user._id }, SECRETKEY, { expiresIn: '1h' });
-            refreshToken = JWT.sign({ userId: user._id }, SECRETKEY, { expiresIn: '1d' })
+            const token = JWT.sign({ userId: user._id }, SECRETKEY, { expiresIn: '1h' });
+            const refreshToken = JWT.sign({ userId: user._id }, SECRETKEY, { expiresIn: '1d' })
             res.json({
                 "status": 200,
                 "mess": "Đăng nhập thành công",
