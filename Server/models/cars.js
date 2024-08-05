@@ -6,7 +6,7 @@ const Cars = new scheme({
     price: { type: Number },
     status: { type: Number },
     images: { type: Array },
-    des: { type: String },
+    des: { type: String }
 }, { timestamps: true })
 
 module.exports = mongoose.model('car', Cars)
