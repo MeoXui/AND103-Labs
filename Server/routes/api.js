@@ -5,6 +5,7 @@ const Users = require("../models/users")
 const Distributors = require("../models/distributors")
 const Fruits = require("../models/fruits")
 const Cars = require("../models/cars")
+const XeMays = require("../models/XeMays")
 
 const Upload = require('../config/common/upload')
 const Transporter = require('../config/common/mail')
@@ -61,7 +62,7 @@ router.get("/distributors", async (req, res) => {
 router.get("/fruits", async (req, res) => {
     const auth = req.headers['auth']
     const token = auth && auth.split('')[1]
-    if (token == null) {return res.sendStatus(401)}
+    if (token == null) { return res.sendStatus(401) }
     let payload
     JWT.verify(token, SECRETKEY, (err, _payload) => {
         if (err instanceof JWT.TokenExpiredError) return res.sendStatus(401)
@@ -178,6 +179,20 @@ router.get("/car_id:id", async (req, res) => {
         res.json({
             "status": 200,
             "mess": `Xe ${id}`,
+            "data": data
+        })
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+router.get("/xe_may_id:id", async (req, res) => {
+    try {
+        const { id } = req.params
+        const data = await XeMays.findById(id)
+        res.json({
+            "status": 200,
+            "mess": `Xe may ${id}`,
             "data": data
         })
     } catch (error) {
@@ -304,6 +319,28 @@ router.get("/search_cars", async (req, res) => {
     // } catch (error) {
     //     console.log(error)
     // }
+})
+
+router.get("/tim_kiem_xe_may", async (req, res) => {
+    try {
+        const key = req.query.key
+        const data = key ? await XeMays.find({ ten_xe_ph38086: { $regex: `${key}`, $options: "i" } }).sort({ createdAt: -1 }) : await XeMays.find().sort({ createdAt: -1 })
+        if (data) {
+            res.json({
+                "status": 200,
+                "mess": "Đã tìm thấy",
+                "data": data
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "mess": "Tìm thất bại",
+                "data": []
+            })
+        }
+    } catch (error) {
+        console.log(error)
+    }
 })
 
 //extra GET
@@ -466,7 +503,7 @@ router.post("/add_distributor", async (req, res) => {
     }
 })
 
-router.post("/add_fruit", Upload.array('images', 5), async (req, res) => {
+router.post("/add_fruit", Upload.array('images'), async (req, res) => {
     try {
         const data = req.body
         const { files } = req
@@ -480,7 +517,7 @@ router.post("/add_fruit", Upload.array('images', 5), async (req, res) => {
             des: data.des,
             id_distributor: data.id_distributor
         })
-        const result = await anew.save()
+        const result = (await anew.save()).populate("id_distributor")
         if (result) {
             res.json({
                 "status": 200,
@@ -527,6 +564,36 @@ router.post("/add_car", Upload.array('images', 5), async (req, res) => {
         }
     } catch (error) {
         console.log(error)
+    }
+})
+
+router.post('/them_xe_may', Upload.single('hinh_anh'), async (req, res) => {
+    try {
+        const data = req.body;
+        const { file } = req
+        const anew = XeMays({
+            ten_xe_ph38086: data.ten_xe_ph38086,
+            mau_Xe_ph38086: data.mau_Xe_ph38086,
+            gia_ban_ph38086: data.gia_ban_ph38086,
+            mo_ta_ph38086: data.mo_ta_ph38086,
+            hinh_anh_ph38086: `${req.protocol}://${req.get("host")}/images/${file.filename}`,
+        })
+        const result = await anew.save()
+        if (result) {
+            res.json({
+                "status": 200,
+                "mess": "Đăng ký thành công",
+                "data": result
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "mess": "Đăng ký thất bại",
+                "data": []
+            })
+        }
+    } catch (error) {
+        console.log(error);
     }
 })
 
