@@ -4,6 +4,7 @@ var router = express.Router()
 const Users = require("../models/users")
 const Distributors = require("../models/distributors")
 const Fruits = require("../models/fruits")
+const Orders = require("../models/orders")
 const Cars = require("../models/cars")
 const XeMays = require("../models/XeMays")
 
@@ -92,21 +93,15 @@ router.get("/fruits", async (req, res) => {
 })
 
 router.get("/cars", async (req, res) => {
+    const auth = req.headers['auth']
+    const token = auth && auth.split('')[1]
+    if (token == null) { return res.sendStatus(401) }
     let payload
-    if (token) {
-        JWT.verify(token, SECRETKEY, (err, _payload) => {
-            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
-            if (err) return res.sendStatus(403)
-            payload = _payload
-        })
-    } else if (refreshToken) {
-        JWT.verify(refreshToken, SECRETKEY, (err, _payload) => {
-            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
-            if (err) return res.sendStatus(403)
-            payload = _payload
-        })
-    }
-    else { return res.sendStatus(401) }
+    JWT.verify(token, SECRETKEY, (err, _payload) => {
+        if (err instanceof JWT.TokenExpiredError) return res.sendStatus(401)
+        // if (err) return res.sendStatus(403)
+        payload = _payload
+    })
     console.log(payload)
 
     try {
@@ -246,21 +241,15 @@ router.get("/search_distributors", async (req, res) => {
 })
 
 router.get("/search_fruits", async (req, res) => {
+    const auth = req.headers['auth']
+    const token = auth && auth.split('')[1]
+    if (token == null) { return res.sendStatus(401) }
     let payload
-    if (token) {
-        JWT.verify(token, SECRETKEY, (err, _payload) => {
-            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
-            if (err) return res.sendStatus(403)
-            payload = _payload
-        })
-    } else if (refreshToken) {
-        JWT.verify(refreshToken, SECRETKEY, (err, _payload) => {
-            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
-            if (err) return res.sendStatus(403)
-            payload = _payload
-        })
-    }
-    else { return res.sendStatus(401) }
+    JWT.verify(token, SECRETKEY, (err, _payload) => {
+        if (err instanceof JWT.TokenExpiredError) return res.sendStatus(401)
+        // if (err) return res.sendStatus(403)
+        payload = _payload
+    })
     console.log(payload)
 
     // try {
@@ -284,21 +273,15 @@ router.get("/search_fruits", async (req, res) => {
 })
 
 router.get("/search_cars", async (req, res) => {
+    const auth = req.headers['auth']
+    const token = auth && auth.split('')[1]
+    if (token == null) { return res.sendStatus(401) }
     let payload
-    if (token) {
-        JWT.verify(token, SECRETKEY, (err, _payload) => {
-            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
-            if (err) return res.sendStatus(403)
-            payload = _payload
-        })
-    } else if (refreshToken) {
-        JWT.verify(refreshToken, SECRETKEY, (err, _payload) => {
-            if (err instanceof JWT.JsonWebTokenError) return res.sendStatus(402)
-            if (err) return res.sendStatus(403)
-            payload = _payload
-        })
-    }
-    else { return res.sendStatus(401) }
+    JWT.verify(token, SECRETKEY, (err, _payload) => {
+        if (err instanceof JWT.TokenExpiredError) return res.sendStatus(401)
+        // if (err) return res.sendStatus(403)
+        payload = _payload
+    })
     console.log(payload)
 
     // try {
@@ -487,15 +470,13 @@ router.post("/add_distributor", async (req, res) => {
             res.json({
                 "status": 200,
                 "mess": "Đã thêm nhà phân phối",
-                "reqdata": data,
-                "resdata": result
+                "data": result
             })
         } else {
             res.json({
                 "status": 400,
                 "mess": "Thêm thất bại",
-                "reqdata": data,
-                "resdata": []
+                "data": []
             })
         }
     } catch (error) {
@@ -522,6 +503,32 @@ router.post("/add_fruit", Upload.array('images'), async (req, res) => {
             res.json({
                 "status": 200,
                 "mess": "Đã thêm trái cây",
+                "data": result
+            })
+        } else {
+            res.json({
+                "status": 400,
+                "mess": "Thêm thất bại",
+                "data": []
+            })
+        }
+    } catch (error) {
+        console.log(error)
+    }
+})
+
+router.post("/add_order", async (req, res) => {
+    try {
+        const data = req.body
+        const anew = new Orders({
+            order_code: data.order_code,
+            id_user: data.id_user
+        })
+        const result = await anew.save()
+        if (result) {
+            res.json({
+                "status": 200,
+                "mess": "Đã thêm đơn hàng",
                 "data": result
             })
         } else {
